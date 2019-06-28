@@ -3,8 +3,7 @@ from scipy.signal import stft
 import numpy as np
 import pywt
 
-scale = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B']
-
+scale = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'] 
 # Stereo audio; take only the first channel.
 rate, data = read("marySongOrig.wav")
 data0 = data#[:, 0]
@@ -39,7 +38,7 @@ def measure_threshold(timefreq_coeffs):
     for cA, cD in timefreq_coeffs:
         lmbda = np.sqrt(2 * np.log(len(cD)))
         σ = np.median(np.abs(cD - np.median(cD))) / 0.6745
-        σ *= 0.64 # Hyperparameter
+        σ *= .8 # Hyperparameter
         thresholds.append(lmbda * σ)
 
     return thresholds
@@ -49,7 +48,7 @@ thresh = measure_threshold(output)
 # Compute the threshold. Apply soft-thresholding
 def apply_threshold(timefreq_coeffs, thresholds):
     for i, (cA, cD) in enumerate(timefreq_coeffs):
-        pywt.threshold(cD, thresholds[i], mode='soft')
+        cD = pywt.threshold(cD, thresholds[i], mode='hard')
         timefreq_coeffs[i] = cA, cD
 
 apply_threshold(output, thresh)
